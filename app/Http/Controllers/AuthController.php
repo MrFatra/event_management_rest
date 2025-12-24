@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\GenerateToken;
 use App\Helpers\ResponseHelper;
 use App\Models\User;
 use Exception;
@@ -24,7 +25,9 @@ class AuthController extends Controller
                 throw new Exception('Wrong username/password');
             }
 
-            return ResponseHelper::genericSuccessResponse('Login Successful.', $user);
+            $token = GenerateToken::bearer($user, 'auth')->plainTextToken;
+
+            return ResponseHelper::genericSuccessResponse('Login Successful.', compact(['user', 'token']));
         } catch (ModelNotFoundException $th) {
             return ResponseHelper::genericDataNotFound($th);
         } catch (Exception $ex) {
@@ -32,7 +35,8 @@ class AuthController extends Controller
         }
     }
 
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         $data = $request->only(['email', 'name', 'password']);
 
         try {
