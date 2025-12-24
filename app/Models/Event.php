@@ -24,6 +24,10 @@ class Event extends Model
         'poster',
     ];
 
+    protected $casts = [
+        'is_online' => 'bool'
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -32,5 +36,9 @@ class Event extends Model
     public function speakers()
     {
         return $this->belongsToMany(Speaker::class, 'event_speakers');
+    }
+
+    public function ratings() {
+        return $this->hasMany(EventRating::class);
     }
 }
