@@ -48,7 +48,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function registrations() {
+    public function registrations()
+    {
         return $this->hasMany(Registration::class);
     }
 
@@ -57,5 +58,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Event::class, 'registrations')
             ->withPivot('status')
             ->withTimestamps();
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

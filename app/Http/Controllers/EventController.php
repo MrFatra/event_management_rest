@@ -54,7 +54,7 @@ class EventController extends Controller
             $registration = Registration::create([
                 'user_id' => $user->id,
                 'event_id' => $id,
-                'status' => (float) $event->price <= 0 ? 'registered' : 'pending'
+                'status' => $event->price <= 0 ? 'registered' : 'pending'
             ]);
 
             return ResponseHelper::genericSuccessResponse('Test Response', $registration);

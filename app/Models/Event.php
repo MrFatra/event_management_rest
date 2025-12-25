@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\EventType;
 use Illuminate\Database\Eloquent\Model;
-
-use function PHPSTORM_META\map;
 
 class Event extends Model
 {
@@ -25,7 +24,9 @@ class Event extends Model
     ];
 
     protected $casts = [
-        'is_online' => 'bool'
+        'is_online' => 'bool',
+        'event_type' => EventType::class,
+        'price' => 'float',
     ];
 
     public function category()
@@ -38,7 +39,18 @@ class Event extends Model
         return $this->belongsToMany(Speaker::class, 'event_speakers');
     }
 
-    public function ratings() {
+    public function ratings()
+    {
         return $this->hasMany(EventRating::class);
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

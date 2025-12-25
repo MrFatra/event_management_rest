@@ -2,12 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
-
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
 
 Route::prefix('/auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
@@ -20,4 +16,12 @@ Route::prefix('/events')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/register', [EventController::class, 'register']);
     });
+});
+
+Route::prefix('/payments')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/', [PaymentController::class, 'checkout']);
+        Route::get('/{orderId}', [PaymentController::class, 'show']);
+    });
+    Route::post('/webhook', [PaymentController::class, 'webhook']);
 });
