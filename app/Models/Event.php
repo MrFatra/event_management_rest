@@ -27,6 +27,7 @@ class Event extends Model
         'is_online' => 'bool',
         'event_type' => EventType::class,
         'price' => 'float',
+        'average_ratings' => 'float',
     ];
 
     public function category()

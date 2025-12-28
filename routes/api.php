@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/auth')->group(function () {
@@ -15,6 +16,7 @@ Route::prefix('/events')->group(function () {
     Route::get('/{id}', [EventController::class, 'view']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/register', [EventController::class, 'register']);
+        Route::post('/{id}/rate', [EventController::class, 'rating']);
     });
 });
 
