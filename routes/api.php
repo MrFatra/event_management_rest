@@ -27,3 +27,7 @@ Route::prefix('/payments')->group(function () {
     });
     Route::post('/webhook', [PaymentController::class, 'webhook']);
 });
+
+Route::prefix('/registrations')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [RegistrationController::class, 'index']);
+});
