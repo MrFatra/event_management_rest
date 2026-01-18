@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             SpeakerSeeder::class,
             EventSpeakerSeeder::class,
             RegistrationSeeder::class,
+            PaymentSeeder::class,
             EventRatingSeeder::class,
         ]);
     }

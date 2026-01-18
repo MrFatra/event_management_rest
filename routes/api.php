@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('/auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
 
 Route::prefix('/events')->group(function () {
@@ -16,6 +18,7 @@ Route::prefix('/events')->group(function () {
     Route::get('/{id}', [EventController::class, 'view']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/register', [EventController::class, 'register']);
+        Route::post('/{id}/unregister', [EventController::class, 'unregister']);
         Route::post('/{id}/rate', [EventController::class, 'rating']);
     });
 });
@@ -30,4 +33,5 @@ Route::prefix('/payments')->group(function () {
 
 Route::prefix('/registrations')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [RegistrationController::class, 'index']);
+    Route::get('/{id}', [RegistrationController::class, 'show']);
 });

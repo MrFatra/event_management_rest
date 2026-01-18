@@ -13,16 +13,34 @@ class RegistrationController extends Controller
         try {
             $user = $request->user();
 
-            $registrations = Registration::with('event')
+            $registrations = Registration::with(['event', 'payment'])
                 ->where('user_id', $user->id);
 
             if ($request->filled('status')) {
                 $registrations->where('status', $request->status);
             }
 
-            $registrations = $registrations->paginate(10);
+            $registrations = $registrations
+                ->orderBy('created_at', 'desc')
+                ->cursorPaginate(2);
 
             return ResponseHelper::genericSuccessResponse('Registration retrieved successfully', $registrations);
+        } catch (\Exception $ex) {
+            return ResponseHelper::genericException($ex);
+        }
+    }
+
+    public function show(Request $request, $id)
+    {
+        try {
+            $user = $request->user();
+
+            $registration = Registration::with(['event', 'payment'])
+                ->where('user_id', $user->id)
+                ->where('id', $id)
+                ->firstOrFail();
+
+            return ResponseHelper::genericSuccessResponse('Registration retrieved successfully', $registration);
         } catch (\Exception $ex) {
             return ResponseHelper::genericException($ex);
         }

@@ -18,6 +18,11 @@ class RegistrationSeeder extends Seeder
                 'user_id' => 1,
                 'event_id' => 1,
                 'status' => 'registered',
+            ],
+            [
+                'user_id' => 1,
+                'event_id' => 2,
+                'status' => 'pending',
             ]
         ];
 

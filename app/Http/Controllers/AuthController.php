@@ -6,18 +6,25 @@ use App\Helpers\GenerateToken;
 use App\Helpers\ResponseHelper;
 use App\Models\User;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $data = $request->only(['email', 'password']);
-
         try {
-            $user = User::where('email', $data['email'])->firstOrFail();
+            $data = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|min:6'
+            ]);
+
+            $user = User::where('email', $data['email'])->first();
+
+            if (!$user) {
+                throw new Exception('Wrong username/password');
+            }
 
             $verifiedPass = Hash::check($data['password'], $user->password);
 
@@ -28,8 +35,8 @@ class AuthController extends Controller
             $token = GenerateToken::bearer($user, 'auth')->plainTextToken;
 
             return ResponseHelper::genericSuccessResponse('Login Successful.', compact(['user', 'token']));
-        } catch (ModelNotFoundException $th) {
-            return ResponseHelper::genericDataNotFound($th);
+        } catch (ValidationException $th) {
+            return ResponseHelper::genericValidationException($th);
         } catch (Exception $ex) {
             return ResponseHelper::genericException($ex);
         }
@@ -37,12 +44,17 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->only(['email', 'name', 'password']);
-
         try {
+            $data = $request->validate([
+                'email' => 'required|email',
+                'name' => 'required',
+                'password' => 'required|min:6'
+            ]);
+
             $user = User::where('email', $data['email'])->first();
 
-            if ($user) throw new Exception('User already exist');
+            if ($user)
+                throw new Exception('User already exist');
 
             $user = User::create([
                 'email' => $data['email'],
@@ -51,8 +63,35 @@ class AuthController extends Controller
             ]);
 
             return ResponseHelper::genericSuccessResponse('User registered successfully', $user);
-        } catch (\Exception $ex) {
+        } catch (ValidationException $th) {
+            return ResponseHelper::genericValidationException($th);
+        } catch (Exception $ex) {
             return ResponseHelper::genericException($ex);
         }
     }
+
+    public function logout(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user || !$user->currentAccessToken()) {
+                return ResponseHelper::genericResponse(
+                    false,
+                    'Unauthenticated',
+                    401
+                );
+            }
+
+            $user->currentAccessToken()->delete();
+
+            return ResponseHelper::genericSuccessResponse(
+                'Logout Successful',
+                $user,
+            );
+        } catch (Exception $e) {
+            return ResponseHelper::genericException($e);
+        }
+    }
+
 }

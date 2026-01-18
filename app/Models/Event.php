@@ -21,6 +21,7 @@ class Event extends Model
         'meeting_link',
         'price',
         'poster',
+        'benefits'
     ];
 
     protected $casts = [
@@ -28,6 +29,7 @@ class Event extends Model
         'event_type' => EventType::class,
         'price' => 'float',
         'average_ratings' => 'float',
+        'benefits' => 'array',
     ];
 
     public function category()

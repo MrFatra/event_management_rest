@@ -39,13 +39,31 @@ class ResponseHelper
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'reason'  => $reason,
+            'reason' => $reason,
+        ], $statusCode);
+    }
+
+    public static function genericResponseWithErrors(
+        bool $success,
+        string $message,
+        array $errors,
+        int $statusCode
+    ): JsonResponse {
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'errors' => $errors,
         ], $statusCode);
     }
 
     public static function genericException(Exception $e): JsonResponse
     {
         return self::genericResponse(false, $e->getMessage(), ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    public static function genericValidationException(Exception $e): JsonResponse
+    {
+        return self::genericResponseWithErrors(false, $e->getMessage(), $e->errors(), ResponseAlias::HTTP_BAD_REQUEST);
     }
 
     public static function genericSuccessResponse($message, $data): JsonResponse
@@ -60,7 +78,7 @@ class ResponseHelper
 
     public static function genericDataNotFound(ModelNotFoundException $e): JsonResponse
     {
-        return self::genericResponseWithReason(false, 'Data not found',  $e->getMessage(), ResponseAlias::HTTP_NOT_FOUND);
+        return self::genericResponseWithReason(false, 'Data not found', $e->getMessage(), ResponseAlias::HTTP_NOT_FOUND);
     }
 
     public static function genericDataUpdated($type): JsonResponse
