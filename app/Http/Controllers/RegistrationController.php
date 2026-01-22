@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Models\Registration;
+use Auth;
 use Illuminate\Http\Request;
 
 class RegistrationController extends Controller
@@ -44,5 +45,24 @@ class RegistrationController extends Controller
         } catch (\Exception $ex) {
             return ResponseHelper::genericException($ex);
         }
+    }
+
+    public function counts()
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        $pending = Registration::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->count();
+
+        $registered = Registration::where('user_id', $user->id)
+            ->where('status', 'registered')
+            ->count();
+
+        $attended = Registration::where('user_id', $user->id)
+            ->where('status', 'attended')
+            ->count();
+
+        return ResponseHelper::genericSuccessResponse('Count retrieved successfully', compact('pending', 'registered', 'attended'));
     }
 }
