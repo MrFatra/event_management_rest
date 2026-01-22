@@ -49,7 +49,7 @@ class EventController extends Controller
 
         $events = $query
             ->orderBy('start_date', 'asc')
-            ->cursorPaginate(2);
+            ->cursorPaginate(10);
 
         return ResponseHelper::genericSuccessResponse(
             'Event retrieved successfully',
@@ -84,15 +84,16 @@ class EventController extends Controller
                     ->exists()
                 : false;
 
-            if ($event->is_registered) {
-                $event->registration = Registration::where('event_id', $event->id)
+            // if ($event->is_registered) {
+            $event->registration =
+                $user ? Registration::where('event_id', $event->id)
                     ->where('user_id', $user->id)
                     ->with('payment')
-                    ->first();
+                    ->first() : null;
 
-                $event->registration->makeHidden(['event_id', 'user_id']);
-                // $event->registration->payment->makeHidden(['registration_id']);
-            }
+            // $event->registration->makeHidden(['event_id', 'user_id']);
+            // $event->registration->payment->makeHidden(['registration_id']);
+            // }
 
             $event->payable = $user
                 ? Registration::where('event_id', $event->id)
