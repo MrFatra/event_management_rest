@@ -33,5 +33,6 @@ Route::prefix('/payments')->group(function () {
 
 Route::prefix('/registrations')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [RegistrationController::class, 'index']);
+    Route::get('/counts', [RegistrationController::class, 'counts']);
     Route::get('/{id}', [RegistrationController::class, 'show']);
 });
