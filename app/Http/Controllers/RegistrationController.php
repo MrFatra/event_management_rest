@@ -65,4 +65,43 @@ class RegistrationController extends Controller
 
         return ResponseHelper::genericSuccessResponse('Count retrieved successfully', compact('pending', 'registered', 'attended'));
     }
+
+    public function store(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $eventId = $request->event_id;
+
+            $event = \App\Models\Event::findOrFail($eventId);
+
+            $exists = Registration::where('user_id', $user->id)->where('event_id', $eventId)->exists();
+            if ($exists) {
+                return ResponseHelper::genericResponse(false, 'You already registered on this event', 409);
+            }
+
+            $registration = Registration::create([
+                'user_id' => $user->id,
+                'event_id' => $eventId,
+                'status' => $event->price <= 0 ? 'registered' : 'pending'
+            ]);
+
+            if ($event->price <= 0) {
+                $orderCode = $event->event_type->orderCode();
+                $orderId = $orderCode . "-" . uniqid();
+
+                \App\Models\Payment::create([
+                    'registration_id' => $registration->id,
+                    'user_id' => $user->id,
+                    'event_id' => $eventId,
+                    'order_id' => $orderId,
+                    'amount' => 0,
+                    'status' => 'paid'
+                ]);
+            }
+
+            return ResponseHelper::genericSuccessResponse('Registration successful', $registration);
+        } catch (\Exception $ex) {
+            return ResponseHelper::genericException($ex);
+        }
+    }
 }

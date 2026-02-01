@@ -58,9 +58,9 @@ class PaymentController extends Controller
             $signatureKey = hash(
                 "sha512",
                 $request->order_id .
-                    $request->status_code .
-                    $request->gross_amount .
-                    $serverKey
+                $request->status_code .
+                $request->gross_amount .
+                $serverKey
             );
 
             if ($signatureKey !== $request->signature_key) {
@@ -77,11 +77,31 @@ class PaymentController extends Controller
                 $payment->registration->update(['status' => 'cancelled']);
             }
 
-            return ResponseHelper::genericSuccessResponse('Webhook payment retrieved', $payment);
+            return ResponseHelper::genericSuccessResponse('Webhook payment retrieved', $request->all());
         } catch (ModelNotFoundException $th) {
             return ResponseHelper::genericDataNotFound($th);
         } catch (\Exception $ex) {
             return ResponseHelper::genericException($ex);
+        }
+    }
+
+    public function pay(Request $request, $registrationId)
+    {
+        try {
+            $data = [
+                'user_id' => $request->user()->id,
+                'registration_id' => $registrationId,
+                'name' => $request->user()->name,
+                'email' => $request->user()->email,
+            ];
+
+            $paymentData = $this->paymentService->process($data);
+            $snapToken = $paymentData['snap_token'];
+            $payment = $paymentData['payment'];
+
+            return view('payments.pay', compact('snapToken', 'payment'));
+        } catch (\Exception $ex) {
+            return redirect()->route('profile.tickets')->with('error', $ex->getMessage());
         }
     }
 }

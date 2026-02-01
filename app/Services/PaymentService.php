@@ -36,10 +36,18 @@ class PaymentService
     public function process(array $data): array
     {
         $registration = Registration::with([
-            'event:id,event_type,price'
+            'event:id,event_type,price,title'
         ])
             ->where('id', $data['registration_id'])
             ->firstOrFail();
+
+        if ($registration->status === 'registered') {
+            throw new \Exception('Registrasi ini sudah dibayar.');
+        }
+
+        if ($registration->event->price <= 0) {
+            throw new \Exception('Event ini gratis, tidak memerlukan pembayaran.');
+        }
 
         $orderCode = $registration->event->event_type->orderCode();
 
@@ -49,24 +57,24 @@ class PaymentService
 
             $snapToken = Snap::getSnapToken([
                 'transaction_details' => [
-                    'order_id'     => $orderId,
+                    'order_id' => $orderId,
                     'gross_amount' => $registration->event->price,
                 ],
                 'customer_details' => [
                     'full_name' => $data['name'],
-                    'email'      => $data['email'],
+                    'email' => $data['email'],
                 ],
             ]);
 
             $payment = $this->paymentRepository->createPayment([
-                'user_id'  => $data['user_id'],
+                'user_id' => $data['user_id'],
                 'registration_id' => $data['registration_id'],
                 'order_id' => $orderId,
-                'amount'   => $registration->event->price,
+                'amount' => $registration->event->price,
             ]);
 
             return [
-                'payment'    => $payment,
+                'payment' => $payment,
                 'snap_token' => $snapToken,
             ];
         });

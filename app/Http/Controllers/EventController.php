@@ -199,11 +199,11 @@ class EventController extends Controller
                 ->where('event_id', $id)
                 ->first();
 
-            if ($registration->payment)
-                $registration->payment->delete();
-
             if (!$registration)
                 throw new Exception('Registration not found');
+
+            if ($registration->payment)
+                $registration->payment->delete();
 
             $registration->delete();
 
